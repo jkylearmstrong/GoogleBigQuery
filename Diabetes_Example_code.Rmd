@@ -152,17 +152,18 @@ find_related_OMOP_codes <- function(list_of_codes, vocab){
   
   query_concept_id <- concept %>%
     filter(concept_code %in% query_concept_codes & vocabulary_id == vocab) %>%
-    select(concept_id)
+    select(concept_id, concept_code) %>%
+    rename(org_concept_code = concept_code)
   
   standard_concept_id <- concept_relationship %>%
     inner_join(query_concept_id, by= join_by(concept_id_1 == concept_id)) %>%
     filter(relationship_id == 'Maps to') %>%
-    select(concept_id_2) 
+    select(concept_id_2, org_concept_code) 
   
   result <- concept_relationship %>%
     inner_join(standard_concept_id , by = join_by(concept_id_2 == concept_id_2)) %>%
     filter(relationship_id == 'Maps to') %>%
-    select(concept_id_1) %>%
+    select(concept_id_1, org_concept_code) %>%
     inner_join(concept, by=join_by(concept_id_1 == concept_id)) %>%
     select(-concept_id_1)
   
@@ -220,4 +221,8 @@ Hypertensive_Disease_Related_local %>%
   arrange(vocabulary_id, concept_code) %>%
   filter(vocabulary_id == 'ICD10CM') %>%
   knitr::kable()
+```
+
+```{r}
+
 ```
