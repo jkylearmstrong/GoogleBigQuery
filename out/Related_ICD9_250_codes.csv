@@ -1,0 +1,38 @@
+concept_name,domain_id,vocabulary_id,concept_class_id,standard_concept,concept_code,valid_start_date,valid_end_date,invalid_reason
+Diabetic patient with most recent hemoglobin a1c level (within the last 6 months) documented as greater than 9%,Observation,HCPCS,HCPCS,NA,G8015,1970-01-01,2014-11-11,D
+Diabetic patient with most recent hemoglobin a1c level (within the last 6 months) documented as less than or equal to 9%,Observation,HCPCS,HCPCS,NA,G8016,1970-01-01,2014-11-11,D
+Diabetic patient with most recent low-density lipoprotein (within the last 12 months) documented as greater than or equal to 100 mg/dl,Observation,HCPCS,HCPCS,NA,G8019,1970-01-01,2014-11-11,D
+Diabetic patient with most recent low-density lipoprotein (within the last 12 months) documented as less than 100 mg/dl,Observation,HCPCS,HCPCS,NA,G8020,1970-01-01,2014-11-11,D
+Diabetic patient with most recent blood pressure (within the last 6 months) documented as equal to or greater than 140 systolic or equal to or greater than 80 mmhg diastolic,Observation,HCPCS,HCPCS,NA,G8023,1970-01-01,2014-11-11,D
+Diabetic patient with most recent blood pressure (within the last 6 months) documented as less than 140 systolic and less than 80 diastolic,Observation,HCPCS,HCPCS,NA,G8024,1970-01-01,2014-11-11,D
+Diabetic patients with no documentation of hemoglobin a1c level (within the last 12 months),Observation,HCPCS,HCPCS,NA,G8385,1970-01-01,2014-11-11,D
+Diabetic patients with no documentation of low-density lipoprotein (within the last 12 months),Observation,HCPCS,HCPCS,NA,G8386,1970-01-01,2014-11-11,D
+Diabetic patients with no documentation of blood pressure measurement (within the last 12 months),Observation,HCPCS,HCPCS,NA,G8390,1970-01-01,2014-11-11,D
+Diabetes mellitus due to underlying condition,Condition,ICD10CM,3-char nonbill code,NA,E08,2012-01-01,2099-12-31,NA
+Diabetes mellitus due to underlying condition with hyperosmolarity without nonketotic hyperglycemic-hyperosmolar coma (NKHHC),Condition,ICD10CM,5-char billing code,NA,E08.00,1970-01-01,2099-12-31,NA
+Diabetes mellitus due to underlying condition with ketoacidosis,Condition,ICD10CM,4-char nonbill code,NA,E08.1,2012-01-01,2099-12-31,NA
+Diabetes mellitus due to underlying condition with diabetic dermatitis,Condition,ICD10CM,6-char billing code,NA,E08.620,1970-01-01,2099-12-31,NA
+Other specified diabetes mellitus,Condition,ICD10CM,3-char nonbill code,NA,E13,2012-01-01,2099-12-31,NA
+Other specified diabetes mellitus with hypoglycemia without coma,Condition,ICD10CM,6-char billing code,NA,E13.649,1970-01-01,2099-12-31,NA
+Other specified diabetes mellitus with hyperglycemia,Condition,ICD10CM,5-char billing code,NA,E13.65,1970-01-01,2099-12-31,NA
+Diabetes mellitus,Condition,ICD9CM,3-dig nonbill code,NA,250,1970-01-01,2099-12-31,NA
+Diabetes mellitus without mention of complication,Condition,ICD9CM,4-dig nonbill code,NA,250.0,1970-01-01,2099-12-31,NA
+Diabetes mellitus associated with unlisted condition,Condition,SNOMED,Clinical Finding,NA,111553002,1970-01-01,2013-01-30,U
+Diabetes mellitus with no mention of complication,Condition,SNOMED,Clinical Finding,NA,154674007,1970-01-01,2016-03-11,U
+Diabetes mellitus with no mention of complication,Condition,SNOMED,Clinical Finding,NA,190321005,1970-01-01,2016-03-11,U
+"Diabetes mellitus: [juvenile type, with no mention of complication] or [insulin dependent]",Condition,SNOMED,Clinical Finding,NA,190322003,1970-01-01,2016-03-11,U
+Diabetes mellitus NOS with no mention of complication,Condition,SNOMED,Clinical Finding,NA,190324002,1970-01-01,2016-03-11,U
+Other specified diabetes mellitus with coma,Condition,SNOMED,Clinical Finding,NA,190336008,1970-01-01,2016-03-11,U
+Other specified diabetes mellitus with multiple complications,Condition,SNOMED,Clinical Finding,NA,190382000,1970-01-01,2016-03-11,U
+Unspecified diabetes mellitus with multiple complications,Condition,SNOMED,Clinical Finding,NA,190383005,1970-01-01,2016-03-11,U
+Diabetes mellitus with other specified manifestation,Condition,SNOMED,Clinical Finding,NA,190417004,1970-01-01,2016-03-11,U
+"Diabetes mellitus, juvenile type, with other specified manifestation",Condition,SNOMED,Clinical Finding,NA,190418009,1970-01-01,2016-03-11,U
+"Diabetes mellitus, adult onset, with other specified manifestation",Condition,SNOMED,Clinical Finding,NA,190419001,1970-01-01,2016-03-11,U
+Other specified diabetes mellitus with other specified complications,Condition,SNOMED,Clinical Finding,NA,190420007,1970-01-01,2016-03-11,U
+Diabetes mellitus NOS with other specified manifestation,Condition,SNOMED,Clinical Finding,NA,190421006,1970-01-01,2016-03-11,U
+Diabetes mellitus,Condition,SNOMED,Clinical Finding,NA,191044006,1970-01-01,2016-03-11,U
+"Diabetes mellitus, juvenile type, with no mention of complication",Condition,SNOMED,Clinical Finding,NA,267379000,1970-01-01,2016-03-11,U
+"Diabetes mellitus, adult onset, with no mention of complication",Condition,SNOMED,Clinical Finding,NA,267380002,1970-01-01,2016-03-11,U
+[X]Unspecified diabetes mellitus with renal complications,Condition,SNOMED,Clinical Finding,NA,397201000000107,2014-04-01,2016-07-30,U
+[X]Other specified diabetes mellitus,Condition,SNOMED,Clinical Finding,NA,442541000000107,2014-04-01,2016-07-30,U
+Diabetes mellitus,Condition,SNOMED,Clinical Finding,S,73211009,1970-01-01,2099-12-31,NA
