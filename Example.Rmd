@@ -1,0 +1,223 @@
+---
+title: Finding Related Codes to Diabetes Mellitus (ICD9 250)
+author: J Kyle Armstrong, PhD
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    number_sections: true
+    toc_depth: 6
+    toc_float:
+      collapsed: TRUE
+      smooth_scroll: TRUE
+---
+
+```{r setup, echo=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r,  echo=FALSE}
+my_billing <- 'sincere-nirvana-175602'
+```
+
+# Introduction 
+
+Related to a conversation we had, I thought it would be helpful to showcase an example of how to find codes related to ICD9 250 (Diabetes Mellitus). 
+
+In this example I will utilize the [Observational Health Data Sciences and Informatics](https://www.ohdsi.org/) (OHDSI) [Observational Medical Outcomes Partnership (OMOP) Common Data Model (CDM)](https://www.ohdsi.org/data-standardization/) which is available on Google Big Query.
+
+The first step is to connect to the [OMOP CDM on Google Big Query](https://console.cloud.google.com/bigquery?ws=!1m4!1m3!3m2!1sbigquery-public-data!2scms_synthetic_patient_data_omop)
+
+```{r, message = FALSE}
+library(dbplyr)
+library(dplyr)
+library(bigrquery)
+```
+
+```{r}
+con <- dbConnect(
+  bigquery(),
+  project = 'bigquery-public-data',
+  dataset = 'cms_synthetic_patient_data_omop',
+  billing = my_billing
+)
+```
+
+Then we will connect to the tables that we will query.
+```{r, message = FALSE, warning=FALSE}
+person <- tbl(con, "person")
+concept <- tbl(con, "concept")
+concept_relationship <- tbl(con, 'concept_relationship')
+```
+
+# Workflow
+
+Our first step is to find the **concept id** that is related to the "250" **concept code** within the ICD9 vocabulary. In the OMOP CDM each medical code (ICD, HCPCS, NDC, ect) is a concept code and is given a unique primary key in the `concept_id` field within the `concept` table. The concept code is the code native within a particular vocabulary, whereas the concept id is assigned by the OMOP CDM. 
+```{r}
+query_concept_codes <- c("250")
+```
+
+This query will give us the unique `concept_id` that is related to 250 within the ICD9 vocabulary:
+```{r}
+query_concept_id <- concept %>%
+  filter(concept_code %in% query_concept_codes & vocabulary_id == "ICD9CM") %>%
+  select(concept_id)
+```
+
+The OMOP CDM additionally contains a **standard concept id**, [one concept representing the meaning of each clinical event is designated the Standard](https://ohdsi.github.io/TheBookOfOhdsi/StandardizedVocabularies.html#standardConcepts). We use this query to find the standard concept id for our original code:  
+```{r}
+standard_concept_id <- concept_relationship %>%
+  inner_join(query_concept_id, by= join_by(concept_id_1 == concept_id)) %>%
+  filter(relationship_id == 'Maps to') %>%
+  select(concept_id_2) 
+```
+
+
+Lastly, now that we have the standard concept id, we can perform another query to find all other concept ids for which this it's standard concept id:
+```{r}
+result <- concept_relationship %>%
+  inner_join(standard_concept_id , by = join_by(concept_id_2 == concept_id_2)) %>%
+  filter(relationship_id == 'Maps to') %>%
+  select(concept_id_1) %>%
+  inner_join(concept, by=join_by(concept_id_1 == concept_id)) %>%
+  select(-concept_id_1)
+```
+
+# Big Query SQL 
+We can generate SQL which can be run on Google Big Query
+```{r}
+dplyr_to_sql <- function(dplyr_sql){
+
+    output_q <- capture.output(show_query(dplyr_sql), type="output")
+    output <- output_q[-1]
+    cat(output , sep = "\n")
+}
+```
+
+```{r, eval=FALSE}
+ctes <- "with concept_relationship as (select * from `bigquery-public-data.cms_synthetic_patient_data_omop.concept_relationship`), 
+concept as (select * from `bigquery-public-data.cms_synthetic_patient_data_omop.concept`)"
+
+cat(ctes, "\n", "\n")
+
+result %>%
+  dplyr_to_sql()
+```
+
+We have saved this Google Big Query at <https://console.cloud.google.com/bigquery?sq=361290472179:7e182757d65c42aa97db5e501f3003b7>
+
+
+# Searchable tables for review  
+
+We can download the results
+```{r}
+result_local <- result %>%
+  collect() %>%
+  distinct()
+```
+
+
+Here we create a searchable table of the output, possible options for the `vocabulary_id` include `HCPCS`, `ICD10CM`, `ICD9CM`, and `SNOMED`. 
+```{r}
+result_local %>%
+  arrange(vocabulary_id, concept_code) %>%
+  DT::datatable(filter = 'top', 
+                options = list(pageLength = 40, autoWidth = TRUE))
+```
+
+
+
+If we wanted potential related IDC10 codes which should map to ICD9 250 we could provide the following list: 
+```{r}
+result_local %>%
+  filter(vocabulary_id == 'ICD10CM') %>%
+  knitr::kable()
+```
+
+We can export all the results from this query and send them for review to see if they are applicable. 
+```{r}
+result_local %>%
+  arrange(vocabulary_id, concept_code) %>%
+  readr::write_csv(here::here('out/Related_ICD9_250_codes.csv'))
+```
+
+# Functionalize queries
+
+Lastly, we would note that we queried a single ICD9 code, it would be relatively easy to edit the definition of `query_concept_codes` in this workflow to account for a list of ICD9 codes or to functionalize this process to get mappings from ICD9 to corresponding ICD10 codes.
+
+```{r}
+find_related_OMOP_codes <- function(list_of_codes, vocab){
+  query_concept_codes <- list_of_codes
+  
+  query_concept_id <- concept %>%
+    filter(concept_code %in% query_concept_codes & vocabulary_id == vocab) %>%
+    select(concept_id)
+  
+  standard_concept_id <- concept_relationship %>%
+    inner_join(query_concept_id, by= join_by(concept_id_1 == concept_id)) %>%
+    filter(relationship_id == 'Maps to') %>%
+    select(concept_id_2) 
+  
+  result <- concept_relationship %>%
+    inner_join(standard_concept_id , by = join_by(concept_id_2 == concept_id_2)) %>%
+    filter(relationship_id == 'Maps to') %>%
+    select(concept_id_1) %>%
+    inner_join(concept, by=join_by(concept_id_1 == concept_id)) %>%
+    select(-concept_id_1)
+  
+  return(result)
+}
+```
+
+
+## Hypertensive Disease Example 
+
+For instance we could apply the function to all ICD9 codes for [Hypertensive Disease](http://www.icd9data.com/2015/Volume1/390-459/401-405/default.htm)
+
+```{r}
+Essential_Hypertension <- c('401','401.0','401.1','401.9')
+Hypertensive_Heart_Disease <- c('402', '402.0', '402.00', '402.01', 
+                                '402.1', '402.10', '402.11', 
+                                '402.9', '402.90', '402.91') 
+Hypertensive_CKD <- c('403', '403.0', '403.00', '403.01', 
+                      '403.1', '403.10', '403.11', 
+                      '403.9', '403.90', '403.91')
+Hypertensive_Heart_CKD <- c('404', '404.0', '404.00', '404.01', '404.02','404.03', 
+                            '404.1', '404.10', '404.11', '404.12', '404.13', 
+                            '404.9', '404.90', '404.91', '404.92', '404.93')
+Secondary_Hypertension <- c('405', '405.0','405.01','405.09', 
+                            '405.1', '405.11', '405.19', 
+                            '405.9', '405.91', '405.99')
+
+Hypertensive_Disease <- c(Essential_Hypertension, 
+                          Hypertensive_Heart_Disease, 
+                          Hypertensive_CKD,
+                          Hypertensive_Heart_CKD,
+                          Secondary_Hypertension)
+
+Hypertensive_Disease_Related <- find_related_OMOP_codes(Hypertensive_Disease, 'ICD9CM')
+```
+
+### Seachable Table for Hypertensive Disease Related codes
+
+Similarly, we can produce searchable outputs 
+```{r}
+Hypertensive_Disease_Related_local <- Hypertensive_Disease_Related %>%
+  collect() %>%
+  distinct()
+
+Hypertensive_Disease_Related_local %>%
+  arrange(vocabulary_id, concept_code) %>%
+  DT::datatable(filter = 'top', 
+                options = list(pageLength = 25, autoWidth = TRUE))
+```
+
+### Hypertensive Disease IDC10 Related codes
+Or give explicit listings or CSVs for review 
+```{r}
+Hypertensive_Disease_Related_local %>%
+  arrange(vocabulary_id, concept_code) %>%
+  filter(vocabulary_id == 'ICD10CM') %>%
+  knitr::kable()
+```
